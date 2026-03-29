@@ -1,6 +1,6 @@
 # Pocket-KVM
 
-一个基于 Qt/C++ 开发的高性能嵌入式 **IP-KVM (Keyboard, Video, Mouse)** 解决方案。该项目运行在 Linux 平台上，通过 V4L2 采集 HDMI 视频信号，经过 H.264 编码后通过 WebSocket 推流到 Web 端，同时支持本地和远程的键鼠控制 (HID) ，通过 CH9329 硬件模拟器发送给被控端。
+一个基于 Qt/C++ 开发的高性能嵌入式 **KVM (Keyboard, Video, Mouse)** 解决方案。该项目运行在 Linux 平台上，通过 V4L2 采集 HDMI 视频信号，通过 CH9329 硬件模拟器发送给被控端。
 
 演示视频：https://www.bilibili.com/video/BV1XbXwBdEk5
 
@@ -43,13 +43,13 @@ https://github.com/CmST0us/tspi-linux-sdk
 
 2. **CSI 采集设备树**
 
-   将本工程 `sys_conf/tspi-rk3566-csi-tc358743适配.dtsi` 的内容复制到：
+   将本工程 `sys_conf/tspi-rk3566-csi-v10-TC358743修改.dtsi` 的内容复制到：
 
    ```config
    tspi-linux-sdk/kernel/arch/arm64/boot/dts/tspi-rk3566-csi-v10.dtsi
    ```
 
-   请确认 `tspi-linux-sdk/kernel/arch/arm64/config/rockchip_defconfig` 中已启用驱动：
+   请确认 `tspi-linux-sdk/kernel/arch/arm64/config/rockchip_linux_defconfig` 中已启用驱动：
 
    ```config
    CONFIG_VIDEO_TC35874X=y
@@ -57,8 +57,17 @@ https://github.com/CmST0us/tspi-linux-sdk
 
 3. **启用串口 `ttyS0`（用于 CH9329）**
 
-kkkkkkkk
+   在 `tspi-linux-sdk/kernelarch/arm64/boot/dts/rockchip/tspi-rk3566-user-v10-linux.dts` 中启用串口0：
 
+   ```config
+   //用户串口0
+   &uart0 {
+	  status = "okay";
+	  pinctrl-names = "default";
+	  pinctrl-0 = <&uart0_xfer>;
+   };
+   ```
+ 
 ### 2.2 增加触摸驱动（`my_sec_ts`）
 
 1. 复制驱动目录：
@@ -93,12 +102,11 @@ kkkkkkkk
 
 进入 SDK 根目录后执行：
 
-```bash
-cd tspi-linux-sdk
-sudo ./build.sh kernel
-sudo ./rkflash.sh boot
-```
-
+   ```bash
+   cd tspi-linux-sdk
+   sudo ./build.sh kernel
+   sudo ./rkflash.sh boot
+   ```
 
 ### 2.4 DEBUG与调试
 
@@ -108,17 +116,20 @@ sudo ./rkflash.sh boot
    adb shell
    ```
 2. 观测显示屏显示是否正常，若不正常请检查焊接。
+3. 串口一般不会出现问题。
 3. TC358743 初始化成功判定：
 
-dmesg | grep tc358
-
-v4l2-ctl 
-
-
-
-建议重启后使用 `dmesg`、`/dev/video*`、`/dev/ttyS0` 等节点检查设备是否加载成功。
-
-## 三、软件部分
+   注意，仅出现下述情景才代表TC358743初始化成功：
+   ```bash
+    root@neonsboard: dmesg | grep tc358
+    [    5.141057] tc35874x 4-000f: driver version: 00.01.01
+    [    5.179549] rockchip-csi2-dphy csi2-dphy0: dphy0 matches m00_b_tc35874x 4-000f:bus type 5
+    [    5.278796] m00_b_tc35874x 4-000f: tc358743 found @ 0x1e (rk3x-i2c) 
+    root@neonsboard: v4l2-ctl -d /dev/v4l-subdev3 --log-status
+    # 输出：m00_b_tc35874x 4-000f: DDC lines enabled: yes 
+   ```
+       
+## 三、KVM软件部分
 
 ![软件示意图](imgs/fig03.png)
 
