@@ -1,6 +1,6 @@
 # Pocket-KVM
 
-一个基于 Qt/C++ 开发的高性能嵌入式 **KVM (Keyboard, Video, Mouse)** 解决方案。该项目运行在 Linux 平台上，通过 V4L2 采集 HDMI 视频信号，同时支持本地和远程的键鼠控制 (HID) ，通过 CH9329 硬件模拟器发送给被控端。
+一个基于 Qt/C++ 开发的高性能嵌入式 **KVM (Keyboard, Video, Mouse)** 解决方案。该项目运行在 Linux 平台上，通过 V4L2 采集 HDMI 视频信号，同时支持本地键鼠控制 (HID) ，通过 CH9329 硬件模拟器发送给被控端。
 
 演示视频：https://www.bilibili.com/video/BV1XbXwBdEk5
 
